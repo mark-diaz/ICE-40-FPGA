@@ -1,0 +1,13 @@
+# Lattice ICE 40 Pinout
+
+#LED Pins:
+set_io o_LED_1 56
+set_io o_LED_2 57
+set_io o_LED_3 59
+set_io o_LED_4 60
+
+# Push-button switches:
+set_io i_Switch_1 53
+set_io i_Switch_2 51
+set_io i_Switch_3 54
+set_io i_Switch_4 52
