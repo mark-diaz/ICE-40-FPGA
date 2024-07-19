@@ -21,6 +21,9 @@ module LED_Adder_tb;
 
     integer i;
     initial begin
+        $dumpfile("test.vcd");
+    $dumpvars(1, LED_Adder_tb);
+
         // Test all combinations of inputs
         for (i = 0; i < 16; i = i + 1) begin
           {sw2, sw1, sw4, sw3} = i;

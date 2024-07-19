@@ -1,0 +1,8 @@
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Verilog
+*.vcd

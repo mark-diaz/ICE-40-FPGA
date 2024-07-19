@@ -12,12 +12,19 @@ module LED_Adder
     wire sum_2;
     wire carry_2;
 
+    // two operands to be added (2-Bit Adder)
+    wire[1:0] op_1;
+    wire[1:0] op_2;
+
+    assign op_1 = {sw2, sw1};
+    assign op_2 = {sw4, sw3}
+
     wire[2:0] sum;
     assign sum = {carry_2, sum_2, sum_1}; //carry_2 is the MSB
-  assign {LED_1, LED_2, LED_3} = sum;
+    assign {LED_1, LED_2, LED_3} = sum;
 
-    full_adder fa_1(.carry_in(1'b0), .in1(sw1), .in2(sw3), .sum(sum_1), .carry(carry_1));
-    full_adder fa_2(.carry_in(carry_1), .in1(sw2), .in2(sw4), .sum(sum_2), .carry(carry_2));
+    full_adder fa_1(.carry_in(1'b0), .in1(op_1[0]), .in2(op_2[0]), .sum(sum_1), .carry(carry_1));
+    full_adder fa_2(.carry_in(carry_1), .in1(op_1[1]), .in2(op_2[1]), .sum(sum_2), .carry(carry_2));
 
 
 endmodule

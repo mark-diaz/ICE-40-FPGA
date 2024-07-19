@@ -7,7 +7,4 @@ set_io LED_3 59
 set_io LED_4 60
 
 # Push-button switches:
-set_io sw1 53
-set_io sw2 51
-set_io sw3 54
-set_io sw4 52
+set_io sw 53
