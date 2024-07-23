@@ -7,8 +7,9 @@ module LED_Adder_tb;
     wire LED_1;
     wire LED_2;
     wire LED_3;
+    wire LED_4;
 
-    // Instantiate the Binary_Counter module
+    // Instantiate the LED_Adder module
     LED_Adder uut (
         .sw1(sw1),
         .sw2(sw2),
@@ -17,6 +18,7 @@ module LED_Adder_tb;
         .LED_1(LED_1),
         .LED_2(LED_2),
         .LED_3(LED_3)
+        .LED_4(LED_4)
     );
 
     integer i;
@@ -33,8 +35,8 @@ module LED_Adder_tb;
     end
 
     initial begin
-      $monitor("Time = %0t: Switches = %b%b + %b%b -> LEDs = %b%b%b",
-                 $time, sw2, sw1, sw4, sw3, LED_1, LED_2, LED_3);
+      $monitor("Time = %0t: Switches = %b%b + %b%b -> LEDs = %b%b%b%b",
+                 $time, sw2, sw1, sw4, sw3, LED_1, LED_2, LED_3, LED_4);
     end
 
 endmodule
