@@ -1,42 +1,46 @@
-// Test bench Link: https://www.edaplayground.com/x/GnAu
-
 module Ring_Counter_tb;
-    reg sw;         // Using reg type for input signals
-    reg clk;        // Using reg type for clock signal
-    wire LED_1, LED_2, LED_3, LED_4; // Outputs as wire
+    reg clk_i;
+    reg sw_i;
+    wire LED_1_o;
+    wire LED_2_o;
+    wire LED_3_o;
+    wire LED_4_o;
 
-    // Instantiate the Ring_Counter Module
+    // Instantiate the Ring_Counter module
     Ring_Counter uut (
-        .sw(sw),
-        .clk(clk),
-        .LED_1(LED_1),
-        .LED_2(LED_2),
-        .LED_3(LED_3),
-        .LED_4(LED_4)
+        .clk_i(clk_i),
+        .sw_i(sw_i),
+        .LED_1_o(LED_1_o),
+        .LED_2_o(LED_2_o),
+        .LED_3_o(LED_3_o),
+        .LED_4_o(LED_4_o)
     );
 
+    // Clock generation
+    always #20 clk_i = ~clk_i; // 25 MHz clock
+
     initial begin
-        $dumpfile("test.vcd");
-        $dumpvars(1, Ring_Counter_tb);
-        // Initialize signals
-        sw = 0;
-        clk = 0;
+      	$dumpfile("test.vcd");
+   		$dumpvars(1, Ring_Counter_tb);
+        // Initialize inputs
+        clk_i = 0;
+        sw_i = 0;
 
-        // Apply reset
-        sw = 1;
-        #5;
-        sw = 0;
+        // Test scenario
+        #100 sw_i = 1; // Press switch
+       	#500 sw_i = 0; // Release switch
+      	#5000;
+        
+        // Add more test scenarios as needed
 
-        // Simulate clock signal 16 times
-        repeat (16) begin
-            #5 clk = ~clk;  // Toggle clock every 5 time units
-        end
-
+        // Finish simulation
         $finish;
     end
 
+    // Monitor outputs
     initial begin
-        $monitor("Time = %0t: LED_1 = %b, LED_2 = %b, LED_3 = %b, LED_4 = %b",
-                 $time, LED_1, LED_2, LED_3, LED_4);
+        $monitor("At time %t, LED_1_o = %b, LED_2_o = %b, LED_3_o = %b, LED_4_o = %b",
+                 $time, LED_1_o, LED_2_o, LED_3_o, LED_4_o);
     end
+
 endmodule

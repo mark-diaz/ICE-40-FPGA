@@ -17,7 +17,7 @@ module LED_Adder_tb;
         .sw4(sw4),
         .LED_1(LED_1),
         .LED_2(LED_2),
-        .LED_3(LED_3)
+        .LED_3(LED_3),
         .LED_4(LED_4)
     );
 
