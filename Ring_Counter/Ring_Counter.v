@@ -8,8 +8,9 @@ module Ring_Counter (
 
     // debounce switch
     reg sw_r;
+    assign sw_w = sw_r;
     
-  debounced_filter debounced_filter_inst(.clk_i(clk_i), .sw_i(sw_i), .sw_o(sw_r));
+  debounced_filter debounced_filter_inst(.clk_i(clk_i), .sw_i(sw_i), .sw_o(sw_w));
 
     // Divide clock to allow ring counter to rotate at 1 Hz
     wire clk_w;
@@ -23,20 +24,21 @@ module Ring_Counter (
 
     always@ (posedge clk_w)
     begin
-      if(sw_r == 1'b1)
+      sw_r <= sw_i;
+      if(sw_i == 1'b1 && sw_r == 1'b0)
         begin
-            q <= 4'b1000;
+            q <= 4'b0001;
         end
         else
         begin
-            q[0] <= q[3];
             q[1] <= q[0];
             q[2] <= q[1];
             q[3] <= q[2];
+            q[0] <= q[3];
         end
     end
 
-    assign {LED_1_o, LED_2_o, LED_3_o, LED_4_o} = q;
+    assign {LED_4_o, LED_3_o, LED_2_o, LED_1_o} = q;
 
 endmodule
 
@@ -74,7 +76,7 @@ module debounced_filter (
 
     // Divide clock to debounce switch
     wire clk_w;
-    clock_divider #(.DIVISOR(100)) clk_div_inst (
+    clock_divider #(.DIVISOR(20)) clk_div_inst (
         .clk_i(clk_i),
         .clk_o(clk_w)
     );
