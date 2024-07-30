@@ -1,17 +1,14 @@
 module Ring_Counter (
-    input clk_i,     // 25 MHz 
+    input clk_i,     // Lattice ICE40: 25 MHz Clock
     input sw_i,     
     output LED_1_o,  
     output LED_2_o,
     output LED_3_o,
     output LED_4_o );
 
-    // debounce switch
+    // holds state of switch
     reg sw_r;
-    assign sw_w = sw_r;
     
-  debounced_filter debounced_filter_inst(.clk_i(clk_i), .sw_i(sw_i), .sw_o(sw_w));
-
     // Divide clock to allow ring counter to rotate at 1 Hz
     wire clk_w;
     clock_divider #(.DIVISOR(25_000_000)) clk_div_inst (
@@ -31,10 +28,7 @@ module Ring_Counter (
         end
         else
         begin
-            q[1] <= q[0];
-            q[2] <= q[1];
-            q[3] <= q[2];
-            q[0] <= q[3];
+            q <= {q[2:0], q[3]};
         end
     end
 
@@ -46,27 +40,28 @@ module clock_divider #(parameter DIVISOR = 25_000_000) (
     input clk_i,
     output clk_o);
   
-    reg state_r;
+    reg clk_r;
     reg [$clog2(DIVISOR)-1:0] count_r = 0;
 
     always@ (posedge clk_i)
     begin
         if(count_r < DIVISOR - 1) 
         begin
-          	state_r <= 0;
+          	clk_r <= 0;
             count_r <= count_r + 1;
         end
         else 
         begin
             count_r <= 0;
-            state_r <= ~state_r;
+            clk_r <= ~clk_r;
       	end
     end
 
-  assign clk_o = state_r;
+  assign clk_o = clk_r;
 
 endmodule
 
+// A simple module to debounce a switch utilizing a clock divider: not necessary because 1 Hz clock is used for Ring Counter
 module debounced_filter (
     input clk_i, 
     input sw_i, 
@@ -83,7 +78,7 @@ module debounced_filter (
   
     always @(posedge clk_w)
     begin
-        sw_r <= sw_i; // can only non-block with regs
+        sw_r <= sw_i; 
    	end
   	
   	assign sw_o = sw_r;

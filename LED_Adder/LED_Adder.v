@@ -20,9 +20,8 @@ module LED_Adder
     assign op_1 = {sw2_i, sw1_i};
     assign op_2 = {sw4_i, sw3_i};
 
+    // Intermediate variable sum used for clarity
     wire[3:0] sum;
-    
-    // MSB: LED_1 
     assign sum = {1'b0, carry_2, sum_2, sum_1}; 
     assign {LED_1_o, LED_2_o, LED_3_o, LED_4_o} = sum;
 
