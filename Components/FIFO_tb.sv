@@ -53,6 +53,7 @@ module FIFO_tb;
 
     initial
     begin
+       	integer i;
         $dumpfile("dump.vcd");
         $dumpvars(1, FIFO_tb);
 
@@ -60,7 +61,7 @@ module FIFO_tb;
 
         // write a test word
         wr_dv_r <= 1'b1;
-        wr_data_r <= 8'hAB;
+        wr_data_r <= 8'hBB;
         @(posedge clk);
             wr_dv_r <= 1'b0;
         @(posedge clk);
@@ -75,7 +76,84 @@ module FIFO_tb;
         @(posedge clk);
             assert(rd_dv_w);
             assert(empty_w);
-            assert(rd_data_w == 8'hAB)
+            assert(rd_data_w == 8'hBB)
+
+        // Fill FIFO with a incrementing pattern
+        reset_fifo();
+
+        // Hex: BB => Binary: 1011 1011
+        wr_data_r <= 8'hBB;
+      
+        repeat(DEPTH)
+        begin
+            wr_dv_r <= 1'b1;
+            @(posedge clk);
+                wr_dv_r <= 1'b0;
+            @(posedge clk);
+                wr_data_r <= wr_data_r + 1;
+        end 
+
+        wr_dv_r <= 1'b0;
+        @(posedge clk);
+            assert(full_w);
+        @(posedge clk);
+        
+        // read out and verify
+    
+        for (i = 8'hBB; i < 8'hBB + DEPTH; i = i + 1)
+        begin
+            rd_en_r <= 1'b1;
+            @(posedge clk);
+                rd_en_r <= 1'b0;
+            @(posedge clk);
+                assert(rd_dv_w);
+                assert(rd_data_w == i) else $error("rd_data is: %d, i is: %d", rd_data_w, i);
+            @(posedge clk);
+
+        end
+        
+        assert(empty_w);
+
+        // test read and writing at the same time
+        reset_fifo();
+        rd_en_r <= 1'b1; 
+        wr_dv_r <= 1'b1;
+
+        @(posedge clk);
+        @(posedge clk);
+            rd_en_r <= 1'b0;
+        
+        repeat(DEPTH)
+          @(posedge clk);
+      	
+      	assert(full_w);
+     	rd_en_r <= 1'b1;
+      	@(posedge clk);
+      		assert(full_w);
+      	@(posedge clk);
+      		assert(full_w);
+     		wr_dv_r <= 1'b0;
+      		rd_en_r <= 1'b0;
+
+        // test AE: almost empty and AF: almost full flags
+        reset_fifo();
+        assert(AE_flag_w);
+        assert(~AF_flag_w);
+
+        wr_dv_r <= 1'b1;
+        @(posedge clk);
+            assert(AE_flag_w);
+            assert(~AF_flag_w);
+        @(posedge clk);
+            assert(~AE_flag_w);
+            assert(~AF_flag_w);
+        @(posedge clk);
+            assert(~AE_flag_w);
+            assert(AF_flag_w);
+        @(posedge clk);
+            assert(~AE_flag_w);
+            assert(AF_flag_w);
+            assert(full_w);
 
 
         $finish();
