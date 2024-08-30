@@ -15,4 +15,8 @@ Firmware developed for Lattice ICE40 FPGA with designs in Verilog and testbenche
 #### Components
 - These are some useful components I plan on using for future projects like a shift register (regular and with linear feedback), RAM, FIFO, and more
 
+#### 7 Segment Display
+- This is a multi-module project in order to increment a 7 Segment Display with the press of a switch
+- It utilizes a module to debounce the switch, convert binary to 7 Segment hex encoding, and a top-level module to handle the counter and switch logic
+
 This repository is very much still a work in progress and hope to contribute more as I go.
