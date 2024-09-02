@@ -1,6 +1,6 @@
 // UART Receiver
 
-// CLOCK CYCLES PER_BIT = FREQUENCY / BAUD RATE
+// CLOCK CYCLES PER BIT = FREQUENCY / BAUD RATE
 // 25000000 / 115200 = 217
 module UART_RX #(parameter CLKS_PER_BIT = 217)
 (
@@ -10,7 +10,7 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
     output [7:0] rx_byte_o
 );
 
-    // Parameters for state for readability 
+    // States for UART Receiver
     parameter IDLE = 3'b000;
     parameter RX_START_BIT = 3'b001;
     parameter RX_DATA_BITS = 3'b010;
@@ -21,13 +21,12 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
     reg [2:0] bit_index_r = 0;
     reg [7:0] rx_byte_r;
     reg rx_dv_r;
-
-    reg [2:0] SM_Main_r;
+    reg [2:0] SM_next_r;
 
     // Handle Receiver State Machine
     always @(posedge clk_i) 
     begin
-        case (SM_Main_r)
+        case (SM_next_r)
             // Initial State: No data currently being sent
             IDLE : 
                 begin
@@ -35,9 +34,9 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
                     clk_count_r <= 0;
                     bit_index_r <= 0;
                     if (rx_serial_i == 1'b0)
-                        SM_Main_r <= RX_START_BIT;
+                        SM_next_r <= RX_START_BIT;
                     else
-                        SM_Main_r <= IDLE;
+                        SM_next_r <= IDLE;
                 end
             
             // Start bit detected
@@ -49,25 +48,25 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
                         if (rx_serial_i == 1'b0)
                         begin
                             clk_count_r <= 0;
-                            SM_Main_r <= RX_DATA_BITS';
+                            SM_next_r <= RX_DATA_BITS';
                         end
                         else
-                            SM_Main_r <= IDLE;
+                            SM_next_r <= IDLE;
                     end
                     else
                     begin
                         clk_count_r <= clk_count_r + 1;
-                        SM_Main_r <= RX_START_BIT;
+                        SM_next_r <= RX_START_BIT;
                     end
                 end
             
             // Data received
             RX_DATA_BITS :
                 begin
-                    if (clk_count_r == CLKS_PER_BIT - 1)
+                    if (clk_count_r < CLKS_PER_BIT - 1)
                     begin
                         clk_count_r <= clk_count_r + 1;
-                        SM_Main_r <= RX_DATA_BITS;
+                        SM_next_r <= RX_DATA_BITS;
                     end
                     else
                     begin
@@ -80,41 +79,41 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
                         if(bit_index_r < 7)
                         begin
                             bit_index_r <= bit_index_r + 1;
-                            SM_Main_r <= RX_DATA_BITS;
+                            SM_next_r <= RX_DATA_BITS;
                         end
                         else
                         begin
                             bit_index_r <= 0;
-                            SM_Main_r <= RX_STOP_BITS;
+                            SM_next_r <= RX_STOP_BITS;
                         end
                     end
                 end
             
             // Stop bit detected
             RX_STOP_BITS :
-            begin
-                if (clk_count_r < CLKS_PER_BIT - 1)
                 begin
-                    clk_count_r <= clk_count_r + 1;
-                    SM_Main_r <= RX_STOP_BITS;
-                end           
-                else
-                begin
-                    rx_dv_r <= 1'b1;
-                    clk_count_r <= 0'
-                    SM_Main_r <= CLEANUP;
+                    if (clk_count_r < CLKS_PER_BIT - 1)
+                    begin
+                        clk_count_r <= clk_count_r + 1;
+                        SM_next_r <= RX_STOP_BITS;
+                    end           
+                    else
+                    begin
+                        rx_dv_r <= 1'b1;
+                        clk_count_r <= 0;
+                        SM_next_r <= CLEANUP;
+                    end
                 end
-            end
 
             // Handle cleanup for one clock cycle
             CLEANUP :
-            begin
-                SM_Main_r <= IDLE;
-                rx_dv_r <= 1'b0;
-            end
+                begin
+                    SM_next_r <= IDLE;
+                    rx_dv_r <= 1'b0;
+                end
             
             default: 
-            SM_Main_r <= IDLE;
+                SM_next_r <= IDLE;
         endcase
     end
     

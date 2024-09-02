@@ -3,6 +3,11 @@ RTL Code developed for Lattice ICE40 FPGA with designs in Verilog and testbenche
 
 ## Projects:
 
+#### UART Receiver and Transmitter
+- UART Receiver and Transmitter that receives a byte from a computer and displays it on a 7 Segment Display
+- The UART Receiver and Transmitter operate using a 115200 Baud rate, 8 data bits, no parity bit, 1 stop bit, and no flow control
+- It drives the 7 Segment Display Module with keyboard input from the computer
+
 #### 7 Segment Display
 - This is a multi-module project in order to increment a 7 Segment Display with the press of a switch
 - It utilizes a module to debounce the switch, convert binary to 7 Segment hex encoding, and a top-level module to handle the counter and switch logic
