@@ -78,7 +78,7 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
                         rx_byte_r[bit_index_r] <= rx_serial_i;
 
                         // check for all bits:
-                        if(bit_index_r < 7)
+                        if (bit_index_r < 7)
                         begin
                             bit_index_r <= bit_index_r + 1;
                             SM_next_r <= RX_DATA_BITS;
