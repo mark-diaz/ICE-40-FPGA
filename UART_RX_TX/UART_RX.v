@@ -1,4 +1,4 @@
-// UART Receiver
+// UART Receiver: https://www.edaplayground.com/x/gs5K
 
 // CLOCK CYCLES PER BIT = FREQUENCY / BAUD RATE
 // 25000000 / 115200 = 217
@@ -6,7 +6,7 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
 (
     input clk_i,
     input rx_serial_i,
-    output rx_dv,
+    output rx_dv_o,
     output [7:0] rx_byte_o
 );
 
@@ -27,6 +27,7 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
     always @(posedge clk_i) 
     begin
         case (SM_next_r)
+
             // Initial State: No data currently being sent
             IDLE : 
                 begin
@@ -42,13 +43,13 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
             // Start bit detected
             RX_START_BIT :
                 begin
-                    // Sample data in the middle of data bit length 
+                    // Sample data in the middle of bit length: prevent false starts
                     if (clk_count_r == CLKS_PER_BIT / 2)
                     begin
                         if (rx_serial_i == 1'b0)
                         begin
                             clk_count_r <= 0;
-                            SM_next_r <= RX_DATA_BITS';
+                            SM_next_r <= RX_DATA_BITS;
                         end
                         else
                             SM_next_r <= IDLE;
@@ -63,6 +64,7 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
             // Data received
             RX_DATA_BITS :
                 begin
+                    // sample data after full period: more reliable
                     if (clk_count_r < CLKS_PER_BIT - 1)
                     begin
                         clk_count_r <= clk_count_r + 1;
@@ -116,5 +118,8 @@ module UART_RX #(parameter CLKS_PER_BIT = 217)
                 SM_next_r <= IDLE;
         endcase
     end
+
+    assign rx_dv_o = rx_dv_r;
+    assign rx_byte_o = rx_byte_r;
     
 endmodule

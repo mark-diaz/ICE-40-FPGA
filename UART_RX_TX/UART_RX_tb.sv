@@ -1,13 +1,18 @@
 module UART_RX_tb();
     // 25 Mhz clock
     // 115200 Baud Rate
-    // 25 000 000 / 115 200 = 217
+    
+    // 1 / 25 000 000 Mhz = 40 ns
     parameter CLOCK_PERIOD = 40;
+    
+    // 25 000 000 / 115 200 = 217
     parameter CLKS_PER_BIT = 217;
-    parameter BIT_PERIOD = 8600;
+
+    // 1 / 115 200 = 8600
+    parameter BIT_PERIOD = 8600; 
 
     reg clk_r = 0;
-    reg rx_serial_r = 1; // start at 1 
+    reg rx_serial_r = 1'b1; // start at 1 
     wire [7:0] rx_byte_w;
 
     // convert input to serial
@@ -17,7 +22,7 @@ module UART_RX_tb();
     integer i;
     begin
         // Start Bit
-        rx_serial_r <= 0;
+        rx_serial_r <= 1'b0;
         #(BIT_PERIOD);
         #1000;
 
@@ -26,7 +31,6 @@ module UART_RX_tb();
         begin
             rx_serial_r <= data_i[i];
             #(BIT_PERIOD);
-
         end
 
         // Stop Bit
@@ -40,11 +44,11 @@ module UART_RX_tb();
     (
         .clk_i(clk_r),
         .rx_serial_i(rx_serial_r),
-        .rx_dv(),
+        .rx_dv_o(),
         .rx_byte_o(rx_byte_w)
-    )
+    );
 
-    always #(CLOCK_PERIOD / 2) clk_r = !clk_r;
+    always #(CLOCK_PERIOD / 2) clk_r = ~clk_r;
 
     initial 
     begin
@@ -52,12 +56,13 @@ module UART_RX_tb();
         @(posedge clk_r);
             UART_write_byte(8'hAB);
 
-        @(posedge clk);
+        @(posedge clk_r);
 
         if(rx_byte_w == 8'hAB)
             $display("Test Passed - Correct Byte Received! :)");
         else
-            $display("Test Failed - Incorrect Byte Received! :(")
+            $display("Test Failed - Incorrect Byte Received! :(");
+
         $finish();
 
     end
