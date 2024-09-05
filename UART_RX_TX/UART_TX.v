@@ -17,15 +17,16 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
     parameter TX_STOP_BIT = 3'b011;
     parameter CLEANUP = 3'b100;
 
-    reg [2:0] SM_next_r = 0;
+    reg [2:0] state_r = 0;
     reg [7:0] clk_count_r = 0;
     reg [2:0] bit_index_r = 0;
     reg [7:0] tx_data_r = 0;
     reg tx_done_r = 0;
     reg tx_active_r = 0;
 
-    always @(posedge clk_i) begin
-        case (SM_next_r)
+    always @(posedge clk_i) 
+    begin
+        case (state_r)
             
             // Initial State: No data currently being sent            
             IDLE :
@@ -39,7 +40,11 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
                 begin
                     tx_active_r <= 1'b1;
                     tx_data_r <= tx_byte_i; // register byte on data valid pulse : extra check
-                    SM_next_r <= TX_START_BIT;
+                    state_r <= TX_START_BIT;
+                end
+                else
+                begin
+                    state_r <= IDLE;
                 end
             end 
 
@@ -52,12 +57,12 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
                 if (clk_count_r < CLKS_PER_BIT - 1)
                 begin
                     clk_count_r <= clk_count_r + 1;
-                    SM_next_r <= TX_START_BIT;
+                    state_r <= TX_START_BIT;
                 end
                 else
                 begin
                     clk_count_r <= 0;
-                    SM_next_r <= TX_DATA_BITS;
+                    state_r <= TX_DATA_BITS;
                 end
             end 
 
@@ -71,7 +76,7 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
                 if (clk_count_r < CLKS_PER_BIT - 1)
                 begin
                     clk_count_r <= clk_count_r + 1;
-                    SM_next_r <= TX_DATA_BITS;
+                    state_r <= TX_DATA_BITS;
                 end
                 else
                 begin
@@ -81,17 +86,17 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
                     if (bit_index_r < 7) 
                     begin
                         bit_index_r <= bit_index_r + 1;
-                        SM_next_r <= TX_DATA_BITS;                     
+                        state_r <= TX_DATA_BITS;                     
                     end
                     else
                     begin
                         bit_index_r <= 0;
-                        SM_next_r <= TX_STOP_BIT;
+                        state_r <= TX_STOP_BIT;
                     end
                 end
             end 
 
-            // 
+            // Send Stop bit
             TX_STOP_BIT :
             begin
                 tx_serial_o <= 1'b1;
@@ -99,29 +104,30 @@ module UART_TX #(parameter CLKS_PER_BIT = 217)
                 if (clk_count_r < CLKS_PER_BIT - 1)
                 begin
                     clk_count_r <= clk_count_r + 1;
-                    SM_next_r <= TX_STOP_BIT;
+                    state_r <= TX_STOP_BIT;
 
                 end
                 else
                 begin
                     tx_done_r <= 1'b1;
                     clk_count_r <= 0;
-                    SM_next_r <= CLEANUP;
+                    state_r <= CLEANUP;
                     tx_active_r <= 1'b0;
                 end
-
             end 
 
             CLEANUP :
             begin
                 tx_done_r <= 1'b1;
-                SM_next_r <= IDLE;
+                state_r <= IDLE;
             end 
 
             default:
-                SM_next_r <= IDLE; 
+                state_r <= IDLE; 
         endcase
     end
 
+    assign tx_active_o = tx_active_r;
+    assign tx_done_o = tx_done_r;
 
 endmodule

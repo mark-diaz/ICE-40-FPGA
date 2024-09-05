@@ -3,7 +3,7 @@ module UART_RX_tb();
     // 115200 Baud Rate
     
     // 1 / 25 000 000 Mhz = 40 ns
-    parameter CLOCK_PERIOD = 40;
+    parameter CLK_PERIOD = 40;
     
     // 25 000 000 / 115 200 = 217
     parameter CLKS_PER_BIT = 217;
@@ -48,7 +48,7 @@ module UART_RX_tb();
         .rx_byte_o(rx_byte_w)
     );
 
-    always #(CLOCK_PERIOD / 2) clk_r = ~clk_r;
+    always #(CLK_PERIOD / 2) clk_r = ~clk_r;
 
     initial 
     begin
