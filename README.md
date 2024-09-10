@@ -1,12 +1,12 @@
 # Lattice ICE 40 FPGA
-RTL Code developed for Lattice ICE40 FPGA with designs in Verilog and testbenches in SystemVerilog. I'm starting from the basics and designing simple projects and modules to learn the fundamentals of RTL Design. I utilize a completely open-source FPGA toolchain to design and program the FPGA but I use ModelSim to verify and create testbenches for my designs.
+RTL Code developed for Lattice ICE40 FPGA with designs in Verilog and testbenches in SystemVerilog. I utilize a completely open-source FPGA toolchain to design and program the FPGA but I use ModelSim to verify and create testbenches for my designs.
 
 ## Projects:
 
 #### UART Receiver and Transmitter
-- UART Receiver and Transmitter that receives a byte from a computer and displays it on a 7 Segment Display
 - The UART Receiver and Transmitter operate using a 115200 Baud rate, 8 data bits, no parity bit, 1 stop bit, and no flow control
-- It drives the 7 Segment Display Module with keyboard input from the computer
+- Both modules utilize a finite state machine to implement the UART protocol 
+- `UART_tb.sv` contains the SystemVerilog testbench that instantiates both modules that transmit and receive a byte of data
 
 #### 7 Segment Display
 - This is a multi-module project in order to increment a 7 Segment Display with the press of a switch
